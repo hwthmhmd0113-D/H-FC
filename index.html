@@ -1,0 +1,1119 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>H-FC | Player Career</title>
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial,sans-serif;
+    user-select:none;
+}
+
+body{
+    background:#07111e;
+    color:white;
+    overflow:hidden;
+}
+
+#rotate{
+    display:none;
+    position:fixed;
+    inset:0;
+    background:#07111e;
+    z-index:9999;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    font-size:24px;
+    flex-direction:column;
+    gap:20px;
+}
+
+@media(orientation:portrait){
+    #rotate{display:flex}
+}
+
+#app{
+    width:100vw;
+    height:100dvh;
+    overflow-y:auto;
+    background:
+    radial-gradient(circle at top right,#123b55,#07111e 65%);
+}
+
+header{
+    height:65px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:0 22px;
+    background:#091725;
+    border-bottom:2px solid #1c91a8;
+}
+
+.logo{
+    font-size:27px;
+    font-weight:900;
+    color:#23d5d5;
+    letter-spacing:2px;
+}
+
+header select{
+    background:#132b3d;
+    color:white;
+    padding:8px;
+    border:1px solid #26758b;
+    border-radius:7px;
+}
+
+.page{
+    display:none;
+    padding:20px;
+    min-height:calc(100dvh - 65px);
+}
+
+.page.active{display:block}
+
+h1{
+    font-size:27px;
+    margin-bottom:15px;
+}
+
+h2{
+    font-size:19px;
+    margin-bottom:12px;
+}
+
+.card{
+    background:linear-gradient(145deg,#142a3c,#0c1b2b);
+    border:1px solid #24465c;
+    border-radius:13px;
+    padding:16px;
+    margin-bottom:14px;
+}
+
+button{
+    border:none;
+    padding:12px 18px;
+    border-radius:8px;
+    background:#13a9ad;
+    color:white;
+    font-weight:bold;
+    font-size:14px;
+    cursor:pointer;
+}
+
+button:active{transform:scale(.96)}
+
+button.secondary{
+    background:#20384b;
+}
+
+button.gold{
+    background:#c58c29;
+}
+
+button:disabled{
+    opacity:.4;
+}
+
+.grid{
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:12px;
+}
+
+.stat{
+    margin:12px 0;
+}
+
+.stat-info{
+    display:flex;
+    justify-content:space-between;
+    margin-bottom:5px;
+    font-size:13px;
+}
+
+.bar{
+    width:100%;
+    height:8px;
+    background:#243747;
+    border-radius:10px;
+    overflow:hidden;
+}
+
+.fill{
+    height:100%;
+    background:linear-gradient(90deg,#11a6aa,#42e5c4);
+    border-radius:10px;
+}
+
+.player{
+    display:flex;
+    align-items:center;
+    gap:20px;
+}
+
+.avatar{
+    width:100px;
+    height:120px;
+    border-radius:12px;
+    background:linear-gradient(150deg,#17617a,#0c2539);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:65px;
+}
+
+.player-info{flex:1}
+
+.big{
+    font-size:32px;
+    font-weight:bold;
+    color:#28d9d0;
+}
+
+.menu-buttons{
+    display:grid;
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    gap:10px;
+    margin-top:18px;
+}
+
+.menu-buttons button{
+    min-height:65px;
+}
+
+input,select{
+    background:#102638;
+    border:1px solid #31536a;
+    padding:12px;
+    color:white;
+    border-radius:7px;
+    width:100%;
+    margin:8px 0;
+}
+
+#coach{
+    background:#163d4b;
+    border-right:4px solid #20d4c4;
+    padding:15px;
+    border-radius:8px;
+    margin-bottom:15px;
+    line-height:1.7;
+}
+
+.match-result{
+    text-align:center;
+    padding:25px;
+}
+
+.score{
+    font-size:55px;
+    color:#2ce0d2;
+    font-weight:bold;
+    margin:20px;
+}
+
+nav{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    padding:12px;
+    background:#091725;
+    position:sticky;
+    bottom:0;
+}
+
+nav button{
+    flex:1;
+    min-width:90px;
+}
+
+small{color:#9eb5c5}
+
+@media(max-height:430px){
+    header{height:48px}
+    .page{padding:12px}
+    nav{padding:6px}
+    nav button{padding:8px}
+}
+
+</style>
+</head>
+
+<body>
+
+<div id="rotate">
+    <div style="font-size:60px">📱</div>
+    <div>أدر هاتفك للعب H-FC</div>
+    <small>Rotate your phone to landscape</small>
+</div>
+
+<div id="app">
+
+<header>
+    <div class="logo">H-FC</div>
+
+    <select id="language" onchange="changeLanguage(this.value)">
+        <option value="ar">العربية</option>
+        <option value="en">English</option>
+        <option value="es">Español</option>
+    </select>
+
+    <div id="headerMoney">€ 0</div>
+</header>
+
+
+<!-- HOME -->
+
+<section id="home" class="page active">
+
+<h1 data="welcome">مسيرة لاعب كرة القدم</h1>
+
+<div id="coach">
+    🧢 <b>Coach H</b>
+    <div id="coachMessage">
+        مرحباً H! هذه بداية رحلتك الاحترافية.
+        أريدك أن تثبت نفسك مع إسبانيول B.
+    </div>
+</div>
+
+<div class="card player">
+
+    <div class="avatar">⚽</div>
+
+    <div class="player-info">
+        <h2 id="playerName">H</h2>
+        <small id="playerTeam">Espanyol B</small>
+
+        <div class="big" id="overall">60</div>
+        <small>OVERALL</small>
+
+        <p>العمر: <span id="age">17</span></p>
+        <p>المركز: <span id="position">CM</span></p>
+        <p>الرقم: <span id="number">8</span></p>
+    </div>
+
+</div>
+
+<div class="grid">
+
+    <div class="card">
+        <small>الموسم</small>
+        <h2 id="season">2026/27</h2>
+    </div>
+
+    <div class="card">
+        <small>المال</small>
+        <h2 id="money">€ 5,000</h2>
+    </div>
+
+    <div class="card">
+        <small>الطاقة</small>
+        <h2 id="energy">100%</h2>
+    </div>
+
+    <div class="card">
+        <small>المزاج</small>
+        <h2 id="morale">85%</h2>
+    </div>
+
+    <div class="card">
+        <small>المتابعون</small>
+        <h2 id="followers">100</h2>
+    </div>
+
+    <div class="card">
+        <small>الشهرة</small>
+        <h2 id="fame">0</h2>
+    </div>
+
+</div>
+
+<div class="menu-buttons">
+
+    <button onclick="showPage('attributes')">
+        📊 القدرات
+    </button>
+
+    <button onclick="showPage('training')">
+        🏋️ التدريب
+    </button>
+
+    <button onclick="showPage('career')">
+        🏆 المسيرة
+    </button>
+
+</div>
+
+</section>
+
+
+<!-- CREATE PLAYER -->
+
+<section id="create" class="page">
+
+<h1>إنشاء اللاعب</h1>
+
+<div class="card">
+
+    <label>اسم اللاعب</label>
+    <input id="createName" value="H" maxlength="18">
+
+    <label>المركز</label>
+
+    <select id="createPosition">
+        <option value="CM">CM - وسط</option>
+        <option value="CAM">CAM - وسط هجومي</option>
+        <option value="CDM">CDM - وسط دفاعي</option>
+        <option value="LW">LW - جناح أيسر</option>
+        <option value="RW">RW - جناح أيمن</option>
+        <option value="ST">ST - مهاجم</option>
+        <option value="LB">LB - ظهير أيسر</option>
+        <option value="RB">RB - ظهير أيمن</option>
+    </select>
+
+    <label>رقم القميص</label>
+    <input id="createNumber" type="number" value="8" min="1" max="99">
+
+    <button onclick="createPlayer()">إنشاء اللاعب</button>
+
+</div>
+
+</section>
+
+
+<!-- ATTRIBUTES -->
+
+<section id="attributes" class="page">
+
+<h1>قدرات اللاعب</h1>
+
+<div class="card">
+
+    <div id="stats"></div>
+
+    <hr style="border-color:#31536a;margin:15px 0">
+
+    <h2>التقييم الإجمالي</h2>
+    <div class="big" id="rating">60</div>
+
+</div>
+
+<button class="secondary" onclick="showPage('home')">العودة</button>
+
+</section>
+
+
+<!-- TRAINING -->
+
+<section id="training" class="page">
+
+<h1>الأسبوع التدريبي</h1>
+
+<div id="coach">
+    🧢 Coach H:
+    اختر نشاطك لهذا الأسبوع بعناية.
+</div>
+
+<div class="card">
+
+    <h2>🏋️ التدريب</h2>
+    <p>تطوير القدرات وتحسين مستواك.</p>
+    <small>+ قدرات | - 25 طاقة</small>
+    <br><br>
+
+    <button onclick="train()">ابدأ التدريب</button>
+
+</div>
+
+<div class="card">
+
+    <h2>😴 الراحة</h2>
+    <p>استعادة الطاقة والتخلص من التعب.</p>
+    <small>+ 35 طاقة</small>
+    <br><br>
+
+    <button class="secondary" onclick="rest()">استرح</button>
+
+</div>
+
+<div class="card">
+
+    <h2>📱 وسائل التواصل</h2>
+    <p>انشر محتوى وطور شهرتك.</p>
+    <small>+ شهرة | + مال | - 10 طاقة</small>
+    <br><br>
+
+    <button class="gold" onclick="social()">نشر محتوى</button>
+
+</div>
+
+</section>
+
+
+<!-- CAREER -->
+
+<section id="career" class="page">
+
+<h1>مسيرتك الاحترافية</h1>
+
+<div class="card">
+
+    <h2>🇪🇸 إسبانيول B</h2>
+    <p>الدوري الإسباني - الدرجة الثانية</p>
+    <p>العمر: <span id="careerAge">17</span></p>
+    <p>المباريات: <span id="matches">0</span></p>
+    <p>الأهداف: <span id="goals">0</span></p>
+    <p>التمريرات الحاسمة: <span id="assists">0</span></p>
+
+</div>
+
+<div class="card">
+
+    <h2>المباراة القادمة</h2>
+    <h2 id="opponent">CD Lugo</h2>
+    <small>مباراة دوري</small>
+    <br><br>
+
+    <button onclick="playMatch()">⚽ العب المباراة</button>
+
+</div>
+
+<div class="card">
+
+    <h2>سجل البطولات</h2>
+    <p>البطولات: <span id="trophies">0</span></p>
+    <p>الكرات الذهبية: <span id="ballons">0</span></p>
+
+</div>
+
+</section>
+
+
+<!-- MATCH RESULT -->
+
+<section id="result" class="page">
+
+<h1>نتيجة المباراة</h1>
+
+<div class="card match-result">
+
+    <h2>Espanyol B</h2>
+
+    <div class="score" id="score">0 - 0</div>
+
+    <h2 id="matchOpponent">CD Lugo</h2>
+
+    <br>
+
+    <div id="matchDetails"></div>
+
+    <br>
+
+    <button onclick="continueCareer()">متابعة المسيرة</button>
+
+</div>
+
+</section>
+
+
+<nav>
+
+<button onclick="showPage('home')">🏠 الرئيسية</button>
+
+<button onclick="showPage('training')">🏋️ التدريب</button>
+
+<button onclick="showPage('career')">⚽ المباريات</button>
+
+<button onclick="showPage('attributes')">📊 القدرات</button>
+
+</nav>
+
+</div>
+
+
+<script>
+
+/* =========================
+   H-FC CAREER SYSTEM
+========================= */
+
+const defaults = {
+
+    name:"H",
+    position:"CM",
+    number:8,
+
+    age:17,
+    season:2026,
+
+    team:"Espanyol B",
+
+    money:5000,
+    energy:100,
+    morale:85,
+
+    fame:0,
+    followers:100,
+
+    attributes:{
+        pace:65,
+        shooting:55,
+        dribbling:65,
+        passing:68,
+        fitness:65,
+        intelligence:65
+    },
+
+    matches:0,
+    goals:0,
+    assists:0,
+
+    trophies:0,
+    ballons:0,
+
+    playedThisWeek:false,
+
+    opponentIndex:0,
+
+    history:[]
+
+};
+
+let career;
+
+try{
+    const saved=localStorage.getItem("HFC_CAREER");
+
+    career=saved?JSON.parse(saved):null;
+
+    if(!career || !career.attributes){
+        career=null;
+    }
+
+}catch(e){
+    career=null;
+}
+
+if(!career){
+    career=structuredClone(defaults);
+}
+
+function save(){
+
+    localStorage.setItem(
+        "HFC_CAREER",
+        JSON.stringify(career)
+    );
+
+    updateUI();
+
+}
+
+
+/* =========================
+   NAVIGATION
+========================= */
+
+function showPage(id){
+
+    document.querySelectorAll(".page")
+    .forEach(p=>p.classList.remove("active"));
+
+    document.getElementById(id)
+    .classList.add("active");
+
+    if(id==="attributes"){
+        renderStats();
+    }
+
+}
+
+
+/* =========================
+   CREATE PLAYER
+========================= */
+
+function createPlayer(){
+
+    const name=document.getElementById("createName").value.trim();
+
+    const number=Number(document.getElementById("createNumber").value);
+
+    if(!name){
+        alert("أدخل اسم اللاعب");
+        return;
+    }
+
+    if(number<1 || number>99){
+        alert("اختر رقماً من 1 إلى 99");
+        return;
+    }
+
+    career.name=name;
+
+    career.position=document.getElementById("createPosition").value;
+
+    career.number=number;
+
+    save();
+
+    showPage("home");
+
+    coach("رائع! أصبحت لاعباً رسمياً في إسبانيول B. لنبدأ رحلتنا!");
+
+}
+
+
+/* =========================
+   PLAYER RATING
+========================= */
+
+function getOverall(){
+
+    const a=career.attributes;
+
+    return Math.round(
+        (a.pace+
+        a.shooting+
+        a.dribbling+
+        a.passing+
+        a.fitness+
+        a.intelligence)/6
+    );
+
+}
+
+
+/* =========================
+   ATTRIBUTES
+========================= */
+
+const statNames={
+
+    pace:"السرعة",
+    shooting:"التسديد",
+    dribbling:"المراوغة",
+    passing:"التمرير",
+    fitness:"اللياقة",
+    intelligence:"الذكاء"
+
+};
+
+function renderStats(){
+
+    let html="";
+
+    for(const key in career.attributes){
+
+        const value=career.attributes[key];
+
+        html+=`
+
+        <div class="stat">
+
+            <div class="stat-info">
+                <span>${statNames[key]}</span>
+                <b>${value}</b>
+            </div>
+
+            <div class="bar">
+                <div class="fill" style="width:${value}%"></div>
+            </div>
+
+        </div>
+
+        `;
+
+    }
+
+    document.getElementById("stats").innerHTML=html;
+
+    document.getElementById("rating").textContent=getOverall();
+
+}
+
+
+/* =========================
+   TRAINING
+========================= */
+
+function train(){
+
+    if(career.playedThisWeek){
+        alert("لقد أنجزت نشاطك لهذا الأسبوع.");
+        return;
+    }
+
+    if(career.energy<25){
+        alert("طاقتك منخفضة. خذ قسطاً من الراحة.");
+        return;
+    }
+
+    const a=career.attributes;
+
+    const choices=["pace","shooting","dribbling","passing","fitness","intelligence"];
+
+    const selected=choices[Math.floor(Math.random()*choices.length)];
+
+    if(a[selected]<99){
+        a[selected]+=1;
+    }
+
+    career.energy-=25;
+
+    career.playedThisWeek=true;
+
+    coach("عمل ممتاز! لقد تحسنت قدرتك على "+statNames[selected]+".");
+
+    save();
+
+    alert("تم التدريب بنجاح! +1 "+statNames[selected]);
+
+}
+
+
+function rest(){
+
+    if(career.playedThisWeek){
+        alert("لقد أنجزت نشاطك لهذا الأسبوع.");
+        return;
+    }
+
+    career.energy=Math.min(100,career.energy+35);
+
+    career.playedThisWeek=true;
+
+    coach("الراحة مهمة جداً للاعب المحترف.");
+
+    save();
+
+    alert("استعدت طاقتك.");
+
+}
+
+
+/* =========================
+   SOCIAL MEDIA
+========================= */
+
+function social(){
+
+    if(career.playedThisWeek){
+        alert("لقد أنجزت نشاطك لهذا الأسبوع.");
+        return;
+    }
+
+    if(career.energy<10){
+        alert("طاقتك منخفضة.");
+        return;
+    }
+
+    career.energy-=10;
+
+    career.fame+=2;
+
+    career.followers+=Math.floor(
+        50+Math.random()*250
+    );
+
+    career.money+=200;
+
+    career.playedThisWeek=true;
+
+    coach("جمهورك بدأ يتعرف عليك! استمر في بناء اسمك.");
+
+    save();
+
+    alert("تم نشر المحتوى بنجاح!");
+
+}
+
+
+/* =========================
+   MATCH SIMULATION
+========================= */
+
+const opponents=[
+    "CD Lugo",
+    "Real Murcia",
+    "Gimnàstic",
+    "CE Sabadell",
+    "UE Cornellà",
+    "Girona B"
+];
+
+function getOpponent(){
+
+    return opponents[
+        career.opponentIndex%opponents.length
+    ];
+
+}
+
+
+function playMatch(){
+
+    if(career.matches>0 && !career.playedThisWeek){
+        alert("اختر نشاطك الأسبوعي أولاً.");
+        return;
+    }
+
+    if(career.energy<20){
+        alert("طاقتك منخفضة جداً! استرح قبل المباراة.");
+        return;
+    }
+
+    const opponent=getOpponent();
+
+    let a=career.attributes;
+
+    let power=getOverall();
+
+    power+=(career.morale-50)*0.12;
+
+    power+=(career.energy-50)*0.08;
+
+    const playerGoals=Math.max(
+        0,
+        Math.min(5,Math.floor(Math.random()*3+power/35))
+    );
+
+    const opponentGoals=Math.floor(Math.random()*3);
+
+    let goals=0;
+    let assists=0;
+
+    if(playerGoals>0){
+
+        goals=Math.random()<0.65?
+        1+Math.floor(Math.random()*playerGoals):0;
+
+        assists=Math.random()<0.6?
+        Math.min(playerGoals,1+Math.floor(Math.random()*2)):0;
+
+    }
+
+    career.matches++;
+
+    career.goals+=goals;
+
+    career.assists+=assists;
+
+    career.money+=500+(goals*300)+(assists*150);
+
+    career.energy=Math.max(0,career.energy-25);
+
+    if(playerGoals>opponentGoals){
+
+        career.morale=Math.min(100,career.morale+8);
+
+        career.fame+=3;
+
+        career.followers+=Math.floor(Math.random()*1000);
+
+    }else if(playerGoals===opponentGoals){
+
+        career.morale=Math.min(100,career.morale+2);
+
+    }else{
+
+        career.morale=Math.max(0,career.morale-8);
+
+    }
+
+    const resultText=
+    playerGoals>opponentGoals?"فوز رائع!":
+    playerGoals===opponentGoals?"تعادل.":"خسارة. حاول التعويض.";
+
+    career.history.push({
+
+        opponent,
+        score:playerGoals+" - "+opponentGoals,
+        goals,
+        assists
+
+    });
+
+    career.opponentIndex++;
+
+    career.playedThisWeek=false;
+
+    document.getElementById("score").textContent=
+    playerGoals+" - "+opponentGoals;
+
+    document.getElementById("matchOpponent").textContent=opponent;
+
+    document.getElementById("matchDetails").innerHTML=`
+
+        <h2>${resultText}</h2>
+
+        <p>⚽ أهدافك: ${goals}</p>
+
+        <p>🎯 تمريراتك الحاسمة: ${assists}</p>
+
+        <p>💰 مكافأة المباراة تمت إضافتها إلى رصيدك.</p>
+
+    `;
+
+    save();
+
+    showPage("result");
+
+}
+
+
+/* =========================
+   NEXT WEEK
+========================= */
+
+function continueCareer(){
+
+    career.playedThisWeek=false;
+
+    career.energy=Math.min(100,career.energy+10);
+
+    save();
+
+    coach("استعد للأسبوع القادم. أريد رؤية تطور مستواك!");
+
+    showPage("home");
+
+}
+
+
+/* =========================
+   COACH
+========================= */
+
+function coach(message){
+
+    document.getElementById("coachMessage").textContent=message;
+
+}
+
+
+/* =========================
+   UI UPDATE
+========================= */
+
+function updateUI(){
+
+    const set=(id,value)=>{
+
+        const el=document.getElementById(id);
+
+        if(el)el.textContent=value;
+
+    };
+
+    set("playerName",career.name);
+
+    set("playerTeam",career.team);
+
+    set("overall",getOverall());
+
+    set("rating",getOverall());
+
+    set("age",career.age);
+
+    set("position",career.position);
+
+    set("number",career.number);
+
+    set("season",career.season+"/"+(career.season+1));
+
+    set("money","€ "+career.money.toLocaleString());
+
+    set("headerMoney","€ "+career.money.toLocaleString());
+
+    set("energy",career.energy+"%");
+
+    set("morale",career.morale+"%");
+
+    set("followers",career.followers.toLocaleString());
+
+    set("fame",career.fame);
+
+    set("matches",career.matches);
+
+    set("goals",career.goals);
+
+    set("assists",career.assists);
+
+    set("trophies",career.trophies);
+
+    set("ballons",career.ballons);
+
+    set("careerAge",career.age);
+
+    set("opponent",getOpponent());
+
+}
+
+
+/* =========================
+   LANGUAGE SYSTEM
+========================= */
+
+function changeLanguage(lang){
+
+    document.documentElement.lang=lang;
+
+    document.documentElement.dir=
+    lang==="ar"?"rtl":"ltr";
+
+    const translations={
+
+        ar:{
+            welcome:"مسيرة لاعب كرة القدم"
+        },
+
+        en:{
+            welcome:"Football Player Career"
+        },
+
+        es:{
+            welcome:"Carrera de futbolista"
+        }
+
+    };
+
+    document.querySelectorAll("[data]").forEach(el=>{
+
+        const key=el.getAttribute("data");
+
+        el.textContent=translations[lang][key];
+
+    });
+
+}
+
+
+/* =========================
+   START
+========================= */
+
+updateUI();
+
+renderStats();
+
+if(!localStorage.getItem("HFC_CREATED")){
+
+    showPage("create");
+
+    localStorage.setItem("HFC_CREATED","1");
+
+}
+
+</script>
+
+</body>
+      </html>
